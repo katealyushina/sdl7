@@ -1,0 +1,19 @@
+@model sdl7.Models.ErrorViewModel
+
+@{
+    ViewData["Title"] = "Ошибка";
+}
+
+<h1 class="text-danger">Произошла ошибка.</h1>
+<h2 class="text-danger">Запрос не может быть выполнен.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Идентификатор запроса:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<p>
+    <a asp-controller="Home" asp-action="Index">Вернуться на главную страницу</a>
+</p>

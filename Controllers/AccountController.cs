@@ -1,20 +1,18 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using sdl7.Data;
 using sdl7.Models;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using System.IO;
+using Microsoft.Extensions.Configuration;
+using System;
+
 namespace sdl7.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly ILogger<AccountController> _logger;
-        private readonly ApplicationDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AccountController(ILogger<AccountController> logger, ApplicationDbContext context)
+        public AccountController(IConfiguration configuration)
         {
-            _logger = logger;
-            _context = context;
+            _configuration = configuration;
         }
 
         [HttpGet]
@@ -24,25 +22,33 @@ namespace sdl7.Controllers
         }
 
         [HttpPost]
-        public IActionResult Login(LoginViewModel model)
+        public IActionResult Login(LoginModel model)
         {
             if (ModelState.IsValid)
             {
-                // Для простоты просто проверяем пароль на "password"
-                if (model.Password == "password")
+                var connString = System.IO.File.ReadAllText("sdl7.conf"); // Полный путь к System.IO.File
+                var csb = new Npgsql.NpgsqlConnectionStringBuilder(connString)
                 {
-                    // Сохраняем пользователя в сессии
-                    HttpContext.Session.SetString("UserName", model.UserName);
+                    Username = model.UserName,
+                    Password = model.Password
+                };
 
+                try
+                {
+                    using var connection = new Npgsql.NpgsqlConnection(csb.ToString());
+                    connection.Open();
                     return RedirectToAction("Index", "Home");
                 }
-                else
+                catch
                 {
+                    using var logWriter = new StreamWriter(_configuration["LOG_FILE_PATH"], true);
+                    logWriter.WriteLine($"{DateTime.Now}: Ошибка: Неправильное имя пользователя или пароль");
                     ModelState.AddModelError("", "Invalid login attempt.");
-                    _logger.LogWarning("Invalid login attempt for user {UserName}", model.UserName);
                 }
             }
             return View(model);
         }
     }
 }
+
+

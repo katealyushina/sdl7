@@ -1,8 +1,15 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Главная";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Use the navigation to access the database functionalities.</p>
-</div>
+<h1>Добро пожаловать!</h1>
+
+<p>
+    <a asp-controller="Data" asp-action="ViewData">Просмотреть таблицы</a>
+</p>
+<p>
+    <a asp-controller="Data" asp-action="CreateEntity">Добавить новые строки</a>
+</p>
+<p>
+    <a asp-controller="Data" asp-action="UpdateEntity">Обновить данные</a>
+</p>

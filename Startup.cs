@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.EntityFrameworkCore;
-using sdl7.Data;
+using Npgsql;
+using System;
 
 namespace sdl7
 {
@@ -19,10 +20,14 @@ namespace sdl7
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(Configuration.GetConnectionString("DefaultConnection")));
             services.AddControllersWithViews();
-            services.AddSession();
+
+            // Добавление подключения Npgsql
+            services.AddScoped<NpgsqlConnection>(_ =>
+            {
+                var connectionString = Configuration.GetConnectionString("DefaultConnection"); // Имя строки подключения из appsettings.json
+                return new NpgsqlConnection(connectionString);
+            });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -36,13 +41,13 @@ namespace sdl7
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
             app.UseAuthorization();
-            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {
@@ -53,3 +58,7 @@ namespace sdl7
         }
     }
 }
+
+
+
+

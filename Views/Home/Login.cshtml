@@ -1,0 +1,21 @@
+@model sdl7.Models.LoginModel
+
+@{
+    ViewData["Title"] = "Вход";
+}
+
+<h1>Вход</h1>
+
+<form asp-action="Login" method="post">
+    <div>
+        <label>Имя пользователя</label>
+        <input asp-for="UserName" />
+    </div>
+    <div>
+        <label>Пароль</label>
+        <input asp-for="Password" type="password" />
+    </div>
+    <div>
+        <input type="submit" value="Войти" />
+    </div>
+</form>

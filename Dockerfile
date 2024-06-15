@@ -1,25 +1,21 @@
-# Use the official .NET SDK image
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
-
-# Copy the project file and restore dependencies
-COPY *.csproj .
-RUN dotnet restore "sdl7.csproj"
-
-# Copy the rest of the application
-COPY . .
-
-# Build the application
-RUN dotnet build "sdl7.csproj" -c Release -o /app/build
-
-# Publish the application
-RUN dotnet publish "sdl7.csproj" -c Release -o /app/publish
-
-# Use the official .NET runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+# Используем SDK-образ для сборки
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build-env
 WORKDIR /app
-COPY --from=build /app/publish .
 
-# Expose the port and run the application
-EXPOSE 80
+# Копируем файл проекта и восстанавливаем зависимости
+COPY sdl7.csproj ./
+RUN dotnet restore
+
+# Копируем остальные файлы и собираем проект
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+# Используем runtime-образ для запуска
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
+COPY --from=build-env /app/out .
+
+# Копируем файл конфигурации
+COPY sdl7.conf ./
+
 ENTRYPOINT ["dotnet", "sdl7.dll"]
